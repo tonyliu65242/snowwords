@@ -179,7 +179,7 @@ passport.use(new LocalStrategy({
 // Determine callback URL based on environment
 const googleCallbackURL = process.env.GOOGLE_CALLBACK_URL ||
                           (process.env.NODE_ENV === 'production'
-                            ? 'https://snowwords.me/auth/google/callback'
+                            ? 'https://www.snowwords.me/auth/google/callback'
                             : 'http://localhost:3000/auth/google/callback');
 
 console.log('='.repeat(60));

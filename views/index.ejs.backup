@@ -17,13 +17,13 @@
     <meta name="description" content="Learn English vocabulary through interactive AI conversations and games with Snowwords. Build your personal vocabulary collection, practice with quizzes, and track your learning progress in a fun winter-themed environment." />
     <meta name="keywords" content="english learning, vocabulary builder, AI language learning, language games, ESL" />
     <meta name="author" content="Snowwords" />
-    <link rel="canonical" href="https://https://p01--snowwords--hxfqcgjhcc88.code.run//" />
+    <link rel="canonical" href="https://snowwords.me/" />
     
     <!-- Social Media Meta Tags -->
     <meta property="og:title" content="Snowwords - English Vocabulary Learning through AI Conversation" />
     <meta property="og:description" content="Learn English vocabulary through interactive AI conversations and games with Snowwords. Build your personal vocabulary collection, practice with quizzes, and track your learning progress." />
-    <meta property="og:image" content="https://https://p01--snowwords--hxfqcgjhcc88.code.run//images/snowwords-social.jpg" />
-    <meta property="og:url" content="https://https://p01--snowwords--hxfqcgjhcc88.code.run/" />
+    <meta property="og:image" content="https://snowwords.me/images/snowwords-social.jpg" />
+    <meta property="og:url" content="https://snowwords.me/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     
@@ -41,11 +41,11 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Snowwords",
-      "url": "https://https://p01--snowwords--hxfqcgjhcc88.code.run//",
+      "url": "https://snowwords.me/",
       "description": "English vocabulary learning through AI conversations, games, and personalized practice",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://https://p01--snowwords--hxfqcgjhcc88.code.run//search?q={search_term_string}",
+        "target": "https://snowwords.me/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }

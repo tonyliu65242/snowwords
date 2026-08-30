@@ -1,6 +1,6 @@
 // background.js – now with server‑wake and auth gating
 
-const SNOWWORDS_DOMAIN = 'https://www.https://p01--snowwords--hxfqcgjhcc88.code.run/';
+const SNOWWORDS_DOMAIN = 'https://snowwords.me/';
 
 // ——— Initialization ———
 chrome.runtime.onInstalled.addListener(() => {

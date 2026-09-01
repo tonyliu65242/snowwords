@@ -691,7 +691,7 @@
         <div id="sidebar">
           <div id="sidebar-content">
             <h2>Word Definitions &amp; Examples</h2>
-            <h4>Snowball Size: <%= snowballSize %> words</h4>
+            <h4>Snowball Size: <span id="snowball-size"><%= snowballSize %></span> words</h4>
             <!-- Placeholder text if no words in sidebar yet -->
             <div id="no-words-placeholder" style="<%= vocab && vocab.length > 0 ? 'display: none;' : '' %>">No words yet! Click on a word you don't understand to see its definition and add it to your Snowball.</div>
             <div id="sidebar-list">
@@ -1141,6 +1141,17 @@
         container.appendChild(exPara);
 
         sidebarList.prepend(container);
+
+        // Keep the "Snowball Size" counter in sync with the sidebar
+        updateSnowballSize();
+      }
+
+      // Recompute the snowball size from the words currently in the sidebar
+      function updateSnowballSize() {
+        const sizeEl = document.getElementById('snowball-size');
+        if (sizeEl) {
+          sizeEl.textContent = document.querySelectorAll('#sidebar-list .vocab-item').length;
+        }
       }
 
       function wrapWordsInSpan(text) {

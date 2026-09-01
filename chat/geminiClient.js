@@ -6,6 +6,11 @@ const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
 });
 
+// Model is configurable via env var so a future Groq decommission is a
+// one-line change. Default: openai/gpt-oss-120b (Groq's recommended
+// replacement for the now-decommissioned llama-3.3-70b-versatile).
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+
 async function sendToGemini(message, systemContext = null) {
     try {
         // Build messages array
@@ -25,9 +30,9 @@ async function sendToGemini(message, systemContext = null) {
             content: message
         });
 
-        // Call Groq API using llama-3.3-70b-versatile (free and fast)
+        // Call Groq API (model configurable via GROQ_MODEL env var)
         const completion = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: GROQ_MODEL,
             messages: messages,
             temperature: 0.7,
             max_tokens: 1024

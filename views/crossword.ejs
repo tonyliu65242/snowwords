@@ -118,6 +118,13 @@
       color: var(--slate-700);
       margin: 0.25rem 0 0 0;
     }
+    /* #game is toggled to display:flex by JS; fill the remaining height so the
+       bounded grid row below has a real height to shrink into. */
+    #game {
+      flex: 1 1 auto;
+      min-height: 0;
+      flex-direction: column;
+    }
     .game-container {
       display: grid;
       grid-template-columns: 320px 1fr;
@@ -646,7 +653,7 @@
 
         // Show the game first so the grid can measure itself and scale to fit
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('game').style.display = 'block';
+        document.getElementById('game').style.display = 'flex';
 
         renderCrossword();
         renderClues();

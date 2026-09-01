@@ -188,14 +188,11 @@
     }
     .crossword-grid {
       display: grid;
-      gap: 1px;
-      background: var(--slate-300);
-      padding: 1px;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
+      gap: 0;
+      background: transparent;
+      padding: 0;
+      margin: 0 auto 0.5rem;
       width: fit-content;
-      margin-left: auto;
-      margin-right: auto;
     }
     .cell-wrapper {
       position: relative;
@@ -213,6 +210,8 @@
       font-size: 1.1rem;
       border: none;
       outline: none;
+      /* light border drawn inside the cell so only word cells show a grid */
+      box-shadow: inset 0 0 0 1px var(--slate-300);
       text-transform: uppercase;
       text-align: center;
       transition: all .2s;
@@ -240,8 +239,17 @@
       background: rgba(59,130,246,0.08);
       box-shadow: inset 0 0 0 1px var(--frost-blue);
     }
+    /* Persistent selection so the current cell stays marked even after the
+       input loses focus (e.g. when clicking elsewhere on the page). */
+    .crossword-cell.selected {
+      background: rgba(59,130,246,0.15);
+      color: var(--frost-blue);
+      box-shadow: inset 0 0 0 2px var(--frost-blue);
+      z-index: 10;
+    }
     .crossword-cell.black {
-      background: var(--polar-night);
+      background: transparent;
+      box-shadow: none;
       cursor: default;
     }
     .crossword-cell.correct {
@@ -950,10 +958,17 @@
     }
 
     function highlightCurrentWord(cell) {
-      // Remove all previous highlights
+      // Remove all previous highlights and selection markers
       document.querySelectorAll('.crossword-cell.highlighted').forEach(c => {
         c.classList.remove('highlighted');
       });
+      document.querySelectorAll('.crossword-cell.selected').forEach(c => {
+        c.classList.remove('selected');
+      });
+
+      // Mark the current cell as selected so it stays visibly chosen even
+      // after the input loses focus (clicking elsewhere on the page).
+      cell.classList.add('selected');
 
       // Get the clue number for the current direction
       const clueNumber = currentDirection === 'across' ? cell.dataset.across : cell.dataset.down;
@@ -962,7 +977,7 @@
       // Highlight all cells with the same clue number in the same direction
       const selector = `[data-${currentDirection}="${clueNumber}"]`;
       document.querySelectorAll(selector).forEach(c => {
-        if (c !== cell) {  // Don't highlight the focused cell
+        if (c !== cell) {  // Don't double-mark the selected cell
           c.classList.add('highlighted');
         }
       });

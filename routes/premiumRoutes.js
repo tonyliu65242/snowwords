@@ -162,68 +162,76 @@ function generateCrossword(words) {
     const size = 15; // 15x15 grid
     const grid = Array(size).fill().map(() => Array(size).fill(''));
     const placedWords = [];
-    const clues = { across: [], down: [] };
-    let clueNumber = 1;
-    
+
     console.log('Starting crossword generation with', words.length, 'words');
-    
+
     // Sort words by length (longest first) for better placement
     words.sort((a, b) => b.word.length - a.word.length);
-    
+
     // Place first word in the center
     const firstWord = words[0];
     const startRow = Math.floor(size / 2);
     const startCol = Math.floor((size - firstWord.word.length) / 2);
-    
+
     console.log('Placing first word:', firstWord.word, 'at', startRow, startCol);
-    
-    placeWord(grid, firstWord, startRow, startCol, 'across', clueNumber);
+
+    placeWord(grid, firstWord, startRow, startCol, 'across');
     placedWords.push({
-      word: firstWord.word,
+      word: firstWord.word.toUpperCase(),
       row: startRow,
       col: startCol,
       direction: 'across',
-      number: clueNumber
+      definition: firstWord.definition
     });
-    
-    clues.across.push({
-      number: clueNumber,
-      clue: firstWord.definition,
-      answer: firstWord.word.toUpperCase()
-    });
-    clueNumber++;
-    
-    // Try to place remaining words - try multiple times with different strategies
+
+    // Try to place remaining words by intersecting with already-placed ones
     for (let i = 1; i < words.length; i++) {
       const word = words[i];
       console.log(`Attempting to place word ${i}: "${word.word}"`);
 
-      const placed = tryPlaceWord(grid, word, placedWords, clueNumber);
+      const placed = tryPlaceWord(grid, word, placedWords);
 
       if (placed) {
+        placed.definition = word.definition;
         placedWords.push(placed);
-        if (placed.direction === 'across') {
-          clues.across.push({
-            number: placed.number,
-            clue: word.definition,
-            answer: word.word.toUpperCase()
-          });
-        } else {
-          clues.down.push({
-            number: placed.number,
-            clue: word.definition,
-            answer: word.word.toUpperCase()
-          });
-        }
-        clueNumber++;
         console.log(`✓ Successfully placed "${word.word}" ${placed.direction} at (${placed.row}, ${placed.col})`);
       } else {
         console.log(`✗ Could not place "${word.word}"`);
       }
     }
-    
+
     console.log('Placed', placedWords.length, 'words out of', words.length);
-    
+
+    // Assign clue numbers using the standard crossword convention: number the
+    // unique starting cells in reading order (top-to-bottom, left-to-right).
+    // An across word and a down word that begin on the same cell share a number.
+    const startKeys = [...new Set(placedWords.map(p => `${p.row},${p.col}`))]
+      .map(k => {
+        const [r, c] = k.split(',').map(Number);
+        return { r, c };
+      })
+      .sort((a, b) => (a.r - b.r) || (a.c - b.c));
+
+    const numberMap = new Map();
+    startKeys.forEach((cell, idx) => numberMap.set(`${cell.r},${cell.c}`, idx + 1));
+
+    const clues = { across: [], down: [] };
+    for (const placed of placedWords) {
+      placed.number = numberMap.get(`${placed.row},${placed.col}`);
+      const entry = {
+        number: placed.number,
+        clue: placed.definition,
+        answer: placed.word.toUpperCase()
+      };
+      if (placed.direction === 'across') {
+        clues.across.push(entry);
+      } else {
+        clues.down.push(entry);
+      }
+    }
+    clues.across.sort((a, b) => a.number - b.number);
+    clues.down.sort((a, b) => a.number - b.number);
+
     // Fill empty cells with black squares
     for (let row = 0; row < size; row++) {
       for (let col = 0; col < size; col++) {
@@ -250,7 +258,7 @@ function generateCrossword(words) {
   }
 }
 
-function placeWord(grid, word, row, col, direction, number) {
+function placeWord(grid, word, row, col, direction) {
   const wordUpper = word.word.toUpperCase();
   
   for (let i = 0; i < wordUpper.length; i++) {
@@ -262,7 +270,7 @@ function placeWord(grid, word, row, col, direction, number) {
   }
 }
 
-function tryPlaceWord(grid, word, placedWords, number) {
+function tryPlaceWord(grid, word, placedWords) {
   const wordUpper = word.word.toUpperCase();
   let attemptCount = 0;
 
@@ -277,7 +285,7 @@ function tryPlaceWord(grid, word, placedWords, number) {
           // If placed word is across, try placing new word down and vice versa
           const newDirection = placed.direction === 'across' ? 'down' : 'across';
 
-          const result = tryIntersection(grid, wordUpper, placed, i, j, newDirection, number);
+          const result = tryIntersection(grid, wordUpper, placed, i, j, newDirection);
           if (result) {
             console.log(`  Found intersection: "${wordUpper[i]}" matches "${placed.word[j]}" in "${placed.word}"`);
             return result;
@@ -291,7 +299,7 @@ function tryPlaceWord(grid, word, placedWords, number) {
   return null;
 }
 
-function tryIntersection(grid, word, placed, wordIndex, placedIndex, direction, number) {
+function tryIntersection(grid, word, placed, wordIndex, placedIndex, direction) {
   const size = grid.length;
 
   // Only allow perpendicular intersections (across with down, or down with across)
@@ -316,13 +324,12 @@ function tryIntersection(grid, word, placed, wordIndex, placedIndex, direction, 
 
   // Check if placement is valid
   if (isValidPlacement(grid, word, newRow, newCol, direction)) {
-    placeWord(grid, { word }, newRow, newCol, direction, number);
+    placeWord(grid, { word }, newRow, newCol, direction);
     return {
       word,
       row: newRow,
       col: newCol,
-      direction,
-      number
+      direction
     };
   } else {
     console.log(`    Placement invalid at (${newRow}, ${newCol}) ${direction}`);
@@ -359,6 +366,19 @@ function isValidPlacement(grid, word, row, col, direction) {
     // If cell is occupied, it must match exactly (valid intersection)
     if (currentCell !== '' && currentCell !== word[i]) {
       return false;
+    }
+
+    // For a brand-new letter (not an intersection), the perpendicular
+    // neighbours must be empty. Otherwise the new word would run directly
+    // alongside an existing word and create invalid, unintended entries.
+    if (currentCell === '') {
+      if (direction === 'across') {
+        if (cellRow > 0 && grid[cellRow - 1][cellCol] !== '') return false;
+        if (cellRow < size - 1 && grid[cellRow + 1][cellCol] !== '') return false;
+      } else {
+        if (cellCol > 0 && grid[cellRow][cellCol - 1] !== '') return false;
+        if (cellCol < size - 1 && grid[cellRow][cellCol + 1] !== '') return false;
+      }
     }
   }
 

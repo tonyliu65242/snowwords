@@ -623,6 +623,8 @@
             cell.addEventListener('focus', () => {
               currentCell = cell;
               highlightCurrentWord(cell);
+              // Select the existing letter so typing overwrites it (maxLength=1)
+              cell.select();
             });
           }
 
@@ -656,31 +658,25 @@
 
     function handleCellInput(e) {
       const cell = e.target;
-      const val = (cell.value || '').toUpperCase();
+      let val = (cell.value || '').toUpperCase();
 
-      // Clear any previous styling
+      // Clear any previous check styling
       cell.classList.remove('correct', 'incorrect');
 
+      if (val.length > 1) {
+        // If multiple characters somehow landed in the cell, keep the last one
+        val = val[val.length - 1];
+      }
+
       if (/^[A-Z]$/.test(val)) {
-        const oldValue = cell.dataset.oldValue || '';
+        // Standard crossword behaviour: overwrite this cell and advance
         cell.value = val;
-
-        // If cell had a value and we're replacing it, shift remaining letters right
-        if (oldValue && oldValue !== val) {
-          shiftLettersRight(cell, val);
-        } else {
-          moveNext(cell);
-        }
-
-        cell.dataset.oldValue = val;
         checkWordCompletion();
-      } else if (val.length > 1) {
-        // Keep only the last character if multiple typed
-        cell.value = val[val.length - 1];
-        cell.dataset.oldValue = cell.value;
+        moveNext(cell);
       } else {
+        // Non-letter input: clear the cell
         cell.value = '';
-        delete cell.dataset.oldValue;
+        checkWordCompletion();
       }
     }
 
@@ -690,23 +686,19 @@
       if (e.key === 'Backspace') {
         e.preventDefault();
         if (cell.value) {
-          // Clear current cell and shift letters left
+          // Clear the current cell and stay put
           cell.value = '';
-          delete cell.dataset.oldValue;
           cell.classList.remove('correct', 'incorrect');
-          shiftLettersLeft(cell);
           checkWordCompletion();
         } else {
-          // Move to previous cell
+          // Already empty: step back to the previous cell and clear it
           movePrev(cell);
+          checkWordCompletion();
         }
       } else if (e.key === 'Delete') {
         e.preventDefault();
-        // Clear current cell and shift letters left
         cell.value = '';
-        delete cell.dataset.oldValue;
         cell.classList.remove('correct', 'incorrect');
-        shiftLettersLeft(cell);
         checkWordCompletion();
       } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
@@ -775,75 +767,6 @@
       if (nextCell && !nextCell.disabled) {
         nextCell.focus();
       }
-    }
-
-    function shiftLettersRight(cell, newLetter) {
-      // Get all cells in the current word direction
-      const cells = getCellsInDirection(cell);
-      if (cells.length <= 1) return;
-
-      // Find current cell index
-      const currentIndex = cells.indexOf(cell);
-      if (currentIndex === -1 || currentIndex === cells.length - 1) return;
-
-      // Shift letters right from the end
-      for (let i = cells.length - 1; i > currentIndex; i--) {
-        const prevCell = cells[i - 1];
-        cells[i].value = prevCell.value || '';
-        cells[i].dataset.oldValue = cells[i].value;
-        cells[i].classList.remove('correct', 'incorrect');
-      }
-
-      // Set the new letter in current cell
-      cell.value = newLetter;
-      cell.dataset.oldValue = newLetter;
-    }
-
-    function shiftLettersLeft(cell) {
-      // Get all cells in the current word direction
-      const cells = getCellsInDirection(cell);
-      if (cells.length <= 1) return;
-
-      // Find current cell index
-      const currentIndex = cells.indexOf(cell);
-      if (currentIndex === -1) return;
-
-      // Shift letters left from current position
-      for (let i = currentIndex; i < cells.length - 1; i++) {
-        const nextCell = cells[i + 1];
-        cells[i].value = nextCell.value || '';
-        cells[i].dataset.oldValue = cells[i].value;
-        cells[i].classList.remove('correct', 'incorrect');
-      }
-
-      // Clear the last cell
-      const lastCell = cells[cells.length - 1];
-      lastCell.value = '';
-      delete lastCell.dataset.oldValue;
-      lastCell.classList.remove('correct', 'incorrect');
-    }
-
-    function getCellsInDirection(cell) {
-      const r = parseInt(cell.dataset.row);
-      const c = parseInt(cell.dataset.col);
-      const cells = [];
-
-      // Determine which clue number this cell belongs to
-      const clueNumber = currentDirection === 'across' ? cell.dataset.across : cell.dataset.down;
-      if (!clueNumber) return [cell];
-
-      // Get all cells with the same clue number in the same direction
-      const selector = `[data-${currentDirection}="${clueNumber}"]`;
-      const matchingCells = Array.from(document.querySelectorAll(selector));
-
-      // Sort by position
-      return matchingCells.sort((a, b) => {
-        if (currentDirection === 'across') {
-          return parseInt(a.dataset.col) - parseInt(b.dataset.col);
-        } else {
-          return parseInt(a.dataset.row) - parseInt(b.dataset.row);
-        }
-      });
     }
 
     function selectCell(cell) {

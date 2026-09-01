@@ -12,12 +12,12 @@
     <title>Log In - Snowwords</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-      /* Global: force full viewport height & disable scrolling */
+      /* Fill the viewport on large screens, but allow scrolling when the
+         content is taller than the screen (e.g. on phones). */
       html, body {
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
         padding: 0;
-        overflow: hidden;
         display: flex;
         flex-direction: column;
       }
@@ -54,7 +54,6 @@
       /* Divide the page into two vertical sections */
       .top-section {
         flex: 0 0 auto;
-        max-height: 70vh;
       }
       
       .section-sky {

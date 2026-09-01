@@ -91,11 +91,12 @@
       max-width: 100%;
       width: 100%;
       margin: 0 auto;
-      padding: 1rem;
+      padding: 0.75rem 1rem 1rem;
       flex: 1 1 auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
+      gap: 0.5rem;
       overflow: hidden;
     }
     .header {
@@ -488,11 +489,6 @@
   </nav>
 
   <div class="container">
-    <div class="header">
-      <h1>🧩 Crossword Puzzle</h1>
-      <p>Challenge yourself with words from your vocabulary!</p>
-    </div>
-
     <% if (user.subscriptionstatus !== 'premium') { %>
       <div class="alert alert-info">
         ⏰ Free users get <strong>1 crossword per day</strong> •
@@ -559,10 +555,10 @@
           </div>
 
           <div class="controls">
-            <button class="btn btn-primary" id="check-answers">✓ Check Answers</button>
-            <button class="btn btn-secondary" id="reveal-answer">💡 Reveal Word</button>
+            <button class="btn btn-primary" id="check-answers">✓ Check Word</button>
+            <button class="btn btn-primary" id="reveal-answer">💡 Hint</button>
             <button class="btn btn-secondary" id="new-puzzle">🔄 New Puzzle</button>
-            <a href="/activities" class="btn btn-secondary">← Back to Activities</a>
+            <a href="/activities" class="btn btn-secondary">← Back</a>
           </div>
         </div>
       </div>

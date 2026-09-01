@@ -564,7 +564,17 @@
           throw new Error(data.error || 'Failed to generate crossword');
         }
 
-        crosswordData = await response.json();
+        // Guard against a non-JSON response (e.g. an auth/redirect HTML page)
+        try {
+          crosswordData = await response.json();
+        } catch (parseErr) {
+          console.error('Response was not JSON:', parseErr);
+          document.getElementById('loading').style.display = 'none';
+          const errorEl = document.getElementById('error');
+          errorEl.innerHTML = '<h3>⚠️ Couldn\'t load puzzle</h3><p>Please make sure you\'re signed in, then refresh and try again.</p><a href="/activities" class="btn btn-primary" style="margin-top:1rem;display:inline-block">Back to Activities</a>';
+          errorEl.style.display = 'block';
+          return;
+        }
         console.log('Crossword data loaded:', crosswordData);
 
         renderCrossword();

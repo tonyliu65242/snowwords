@@ -2724,7 +2724,19 @@ app.use((err, req, res, next) => {
 app.use(mainRoutes);
 app.use(premiumRoutes);
 
-// API routes for premium features
+// API routes for premium features.
+// Crossword generation is a FREE feature (1 puzzle/day, enforced inside the
+// route itself), so authenticated non-premium users must be able to reach it.
+// This mount handles ONLY the crossword endpoint and must come before the
+// premium-gated mount below — otherwise ensurePremium redirects free users to
+// /subscription/plans (an HTML page), which the crossword page's fetch would
+// follow and then fail to parse as JSON.
+app.use('/api/premium', ensureAuthenticated, (req, res, next) => {
+  if (req.method === 'POST' && req.path === '/crossword/generate') {
+    return premiumRoutes(req, res, next);
+  }
+  next();
+});
 app.use('/api/premium', ensureAuthenticated, ensurePremium, premiumRoutes);
 
 

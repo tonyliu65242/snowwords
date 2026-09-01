@@ -36,12 +36,20 @@
       color: var(--polar-night);
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      /* Full-height flex column so the puzzle area fills exactly the space
+         under the navbar on any device, regardless of navbar height. */
+      display: flex;
+      flex-direction: column;
     }
     html, body {
       height: 100%;
-      overflow-y: auto;
+    }
+    body {
+      height: 100vh;
+      overflow: hidden;
     }
     .navbar {
+      flex-shrink: 0;
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -81,9 +89,11 @@
     }
     .container {
       max-width: 100%;
+      width: 100%;
       margin: 0 auto;
       padding: 1rem;
-      height: calc(100vh - 60px);
+      flex: 1 1 auto;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -416,8 +426,15 @@
         --cell-size: 42px;
       }
       /* On narrow screens stack the board above the clues and allow scroll */
-      .container {
+      html, body {
         height: auto;
+      }
+      body {
+        height: auto;
+        overflow: auto;
+      }
+      .container {
+        flex: none;
         overflow: visible;
       }
       .game-container {
@@ -425,6 +442,13 @@
       }
       .board-panel {
         order: -1;
+        overflow: visible;
+      }
+      .grid-scroll {
+        max-height: 65vh;
+      }
+      .clues-panel {
+        overflow: visible;
       }
       .crossword-cell {
         font-size: 1.2rem;
@@ -628,6 +652,7 @@
         renderClues();
         updateStats();
         fitGrid();
+        observeGridFit();
 
         // Focus first fillable cell
         const firstCell = document.querySelector('#crossword-grid input.crossword-cell:not(.black)');
@@ -723,24 +748,45 @@
       fitGrid();
     }
 
-    // Scale the cells so the whole board fits inside its scroll area
+    // Scale the cells so the whole board fits inside its scroll area, based on
+    // the actual measured space (adapts to any screen / device / orientation).
     function fitGrid() {
       const gridEl = document.getElementById('crossword-grid');
+      if (!gridEl) return;
       const scroll = gridEl.parentElement;
       const cols = parseInt(gridEl.dataset.cols || '0');
       const rows = parseInt(gridEl.dataset.rows || '0');
       if (!cols || !rows) return;
 
-      const availW = scroll.clientWidth - 6;
-      const availH = scroll.clientHeight - 6;
+      const availW = scroll.clientWidth;
+      const availH = scroll.clientHeight;
       if (availW <= 0 || availH <= 0) return; // not visible yet
 
-      // account for the 1px gap between cells
-      let size = Math.min(40, Math.floor((availW - cols) / cols), Math.floor((availH - rows) / rows));
-      size = Math.max(size, 18);
+      // (cols-1) accounts for the 1px gaps between cells
+      const byW = Math.floor((availW - (cols - 1)) / cols);
+      const byH = Math.floor((availH - (rows - 1)) / rows);
+      let size = Math.min(44, byW, byH);
+      size = Math.max(size, 16);
       gridEl.style.setProperty('--cell-size', size + 'px');
     }
+
+    // Re-fit on any size change of the board area (covers every device,
+    // window resize, orientation change, font load, etc.).
+    let __gridObserver = null;
+    function observeGridFit() {
+      const gridEl = document.getElementById('crossword-grid');
+      if (!gridEl || !gridEl.parentElement) return;
+      if (typeof ResizeObserver !== 'undefined' && !__gridObserver) {
+        __gridObserver = new ResizeObserver(() => fitGrid());
+        __gridObserver.observe(gridEl.parentElement);
+      }
+      // A couple of deferred passes in case layout/fonts settle after render
+      requestAnimationFrame(fitGrid);
+      setTimeout(fitGrid, 150);
+    }
     window.addEventListener('resize', fitGrid);
+    window.addEventListener('orientationchange', () => setTimeout(fitGrid, 200));
+    window.addEventListener('load', fitGrid);
 
     function renderClues() {
       const acrossEl = document.getElementById('across-clues');

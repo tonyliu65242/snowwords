@@ -275,15 +275,12 @@
       min-width: 0;
     }
     .clues-column h3 {
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
       margin: 0 0 0.5rem 0;
-      padding-bottom: 0.5rem;
+      padding: 0.15rem 0 0.5rem;
       border-bottom: 2px solid var(--slate-200);
-      font-weight: 700;
-      font-size: 1rem;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--frost-blue);
       position: sticky;
       top: 0;
       background: white;
@@ -552,11 +549,11 @@
         <!-- Clues on the left, parallel to the board -->
         <div class="clues-panel">
           <div class="clues-column">
-            <h3>→ Across <span class="dir-note">(horizontal)</span></h3>
+            <h3>➡️ Horizontal <span class="dir-note">(across)</span></h3>
             <div id="across-clues"></div>
           </div>
           <div class="clues-column">
-            <h3>↓ Down <span class="dir-note">(vertical)</span></h3>
+            <h3>⬇️ Vertical <span class="dir-note">(down)</span></h3>
             <div id="down-clues"></div>
           </div>
         </div>

@@ -202,18 +202,30 @@ function generateCrossword(words) {
 
     console.log('Placed', placedWords.length, 'words out of', words.length);
 
-    // Assign clue numbers using the standard crossword convention: number the
-    // unique starting cells in reading order (top-to-bottom, left-to-right).
-    // An across word and a down word that begin on the same cell share a number.
-    const startKeys = [...new Set(placedWords.map(p => `${p.row},${p.col}`))]
-      .map(k => {
-        const [r, c] = k.split(',').map(Number);
-        return { r, c };
-      })
-      .sort((a, b) => (a.r - b.r) || (a.c - b.c));
+    // Assign clue numbers the canonical way: derive them from the grid itself.
+    // A cell is numbered when it starts an across run and/or a down run, and
+    // cells are numbered in reading order (top-to-bottom, left-to-right). By
+    // deriving numbers from the grid, the numbers shown on the board can never
+    // disagree with the clue list, and every visible run gets a number.
+    // (Empty cells are still '' here — the '#' fill happens further below.)
+    const startsRun = (r, c) => {
+      if (grid[r][c] === '') return false;
+      const startAcross = (c === 0 || grid[r][c - 1] === '') &&
+                          (c + 1 < size && grid[r][c + 1] !== '');
+      const startDown = (r === 0 || grid[r - 1][c] === '') &&
+                        (r + 1 < size && grid[r + 1][c] !== '');
+      return startAcross || startDown;
+    };
 
     const numberMap = new Map();
-    startKeys.forEach((cell, idx) => numberMap.set(`${cell.r},${cell.c}`, idx + 1));
+    let nextNumber = 1;
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (startsRun(r, c)) {
+          numberMap.set(`${r},${c}`, nextNumber++);
+        }
+      }
+    }
 
     const clues = { across: [], down: [] };
     for (const placed of placedWords) {

@@ -159,11 +159,15 @@ router.post('/crossword/generate', async (req, res) => {
 // Helper function to generate crossword puzzle
 function generateCrossword(words) {
   try {
-    const size = 15; // 15x15 grid
+    // Size the grid to the longest word (+padding) so long words like
+    // "electromagnetism" fit. A fixed 15-wide grid pushed long words off the
+    // board at a negative column, which broke placement and numbering.
+    const longest = words.reduce((m, w) => Math.max(m, w.word.length), 0);
+    const size = Math.max(15, longest + 2);
     const grid = Array(size).fill().map(() => Array(size).fill(''));
     const placedWords = [];
 
-    console.log('Starting crossword generation with', words.length, 'words');
+    console.log('Starting crossword generation with', words.length, 'words; grid size', size);
 
     // Sort words by length (longest first) for better placement
     words.sort((a, b) => b.word.length - a.word.length);

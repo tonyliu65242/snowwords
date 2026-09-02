@@ -48,7 +48,11 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: false,
+    // In production (HTTPS behind the trusted proxy) use SameSite=None +
+    // Secure so the session cookie is sent on the Chrome extension's
+    // cross-origin requests. Locally (http) fall back to Lax so dev works.
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true
   },

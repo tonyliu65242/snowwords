@@ -1,6 +1,6 @@
 // popup.js - Extension popup functionality
 
-const SNOWWORDS_DOMAIN = 'https://snowwords.me/'; // Change to your domain
+const SNOWWORDS_DOMAIN = 'https://snowwords.me'; // Change to your domain
 
 // Initialize popup when DOM loads
 document.addEventListener('DOMContentLoaded', initializePopup);

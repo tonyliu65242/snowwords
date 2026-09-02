@@ -572,18 +572,24 @@
           padding: 0 1rem;
         }
         
-        /* Sidebar adjustments */
+        /* On phones: always show the chat full-width and hide the vocabulary
+           (snowball) sidebar, even when the container has the .open class. */
+        #sidebar,
         .open #sidebar {
-          width: 100%;
+          display: none !important;
+          width: 0 !important;
         }
-        
+
+        #chat-container,
         .open #chat-container {
-          width: 0;
-          display: none;
+          width: 100% !important;
+          display: flex !important;
+          border-right: none;
         }
-        
-        #toggle-arrow {
-          display: none;
+
+        #toggle-arrow,
+        .open #toggle-arrow {
+          display: none !important;
         }
         
         /* Popup adjustments */
